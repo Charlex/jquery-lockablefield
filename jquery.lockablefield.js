@@ -1,3 +1,7 @@
+//! jquery-lockablefield
+//! version : 0.0.1b
+//! authors : @charlex
+
 (function($) {
     'use strict';
 
@@ -26,7 +30,7 @@
                 'unlockedButtonFillColor': "#D6E8F5",
                 'unlockedInputFillColor': "#D6E8F5",
                 'lockedButtonFillColor': "initial",
-                'lockedInputFillColor': "initial",
+                'lockedInputFillColor': "#FFFFFF",
                 'extraButtonStyles': {},
                 'onChange': function(){}
             };
@@ -41,22 +45,41 @@
 
             $input.prop("disabled", !settings["unlockable"])
 
+            if($this.find(".lf-container").length === 0) {
+                $input.wrap("<div class='lf-container'></div>");
+            }
+            var $container = $this.find(".lf-container");
+
             $label.find(".lf-btn").remove();
-            $label.prepend("<div class='lf-btn'></div>");
+            $container.prepend("<div class='lf-btn'></div>");
             var $btn = $label.find(".lf-btn");
 
             if(settings["icons"] == "fontawesome") {
                 var locked_btn_html = "<i class='fa fa-toggle-on'></i>",
                 unlocked_btn_html = "<i class='fa fa-toggle-off'></i>";
             } else {
-                var locked_btn_html = "&#128274;",
-                unlocked_btn_html = "&#128275;";
+                var locked_btn_html = "<span class='lf-emoji-icon'>&#128274;</div>",
+                unlocked_btn_html = "<span class='lf-emoji-icon'>&#128275;</div>";
             }
+            $this.css({
+                "position":"relative"
+            });
+
+            $input.css({
+                "padding-left": 28
+            });
+
+            $("head").append("<style>.lf-container:after{ clear: both; content: ''; display: table; }</style>");
 
             var button_styles = $.extend({
-                    "padding-right": 5,
                     "float": "left",
-                    "cursor": "pointer"
+                    "position": "absolute",
+                    "cursor": "pointer",
+                    "font-size": 16,
+                    "padding-top": ($container.height()/2) - 8,
+                    "padding-left": 5,
+                    "padding-bottom": ($input.height())/2,
+                    "left": 0,
                 },
                 settings['extraButtonStyles']
             );
