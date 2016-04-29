@@ -23,6 +23,16 @@
     $.fn.lockableField = function(options) {
 
         return this.each(function() {
+            var $this = $(this),
+            $input = $this;
+
+            /* If if it's not an input field, throw an error. */
+            if(!$this.is("input")) {
+                throw "lockableField error: must be applied to input element. " + $this.prop('tagName') + "#" + $this.attr("id");
+                return false;
+            }
+
+            /* Combine the default settings, with existing settings, and any new settings */
             var settings = {
                 'locked': true,
                 'unlockable': true,
@@ -34,43 +44,41 @@
                 'extraButtonStyles': {},
                 'onChange': function(){}
             };
-
-            var $this = $(this),
-                $label = $this,
-                $input = $this.find("input:first");
-
             settings = $.extend(settings, $this.data('_LockableFieldSettings'), options);
 
-            $label.addClass("lockablefield");
-
-            $input.prop("disabled", !settings["unlockable"])
-
-            if($this.find(".lf-container").length === 0) {
-                $input.wrap("<div class='lf-container'></div>");
-            }
-            var $container = $this.find(".lf-container");
-
-            $label.find(".lf-btn").remove();
-            $container.prepend("<div class='lf-btn'></div>");
-            var $btn = $label.find(".lf-btn");
-
+            /* Use emoji as a fallback if fontawesome isn't chosen. */
             if(settings["icons"] == "fontawesome") {
-                var locked_btn_html = "<i class='fa fa-toggle-on'></i>",
-                unlocked_btn_html = "<i class='fa fa-toggle-off'></i>";
+                var locked_btn_html = "<i class='lf-fa fa fa-toggle-on'></i>",
+                unlocked_btn_html = "<i class='lf-fa fa fa-toggle-off'></i>";
             } else {
                 var locked_btn_html = "<span class='lf-emoji-icon'>&#128274;</div>",
                 unlocked_btn_html = "<span class='lf-emoji-icon'>&#128275;</div>";
             }
-            $this.css({
-                "position":"relative"
-            });
 
-            $input.css({
-                "padding-left": 28
-            });
+            /* Disable the input if the field is not unlockable */
+            if(!settings['unlockable']) {
+                $input.prop('disabled', true);
+            } else {
+                $input.removeProp('disabled');
+            }
 
+            /* Wrap the input in a container */
+            if($this.parent(".lf-container").length == 0) {
+                $input.wrap("<div class='lf-container' style='position:relative;'></div>");
+            }
+            var $container = $this.parent(".lf-container");
+
+            /* Apply a clearfix to the container */
             $("head").append("<style>.lf-container:after{ clear: both; content: ''; display: table; }</style>");
 
+            /* Prepend the lock button to the container */
+            $container.find(".lf-btn").remove();
+            if($container.find(".lf-btn").length == 0) {
+                $container.prepend("<div class='lf-btn'></div>");
+            }
+            var $btn = $container.find(".lf-btn");
+
+            /* Style the button */
             var button_styles = $.extend({
                     "float": "left",
                     "position": "absolute",
@@ -88,29 +96,35 @@
             }
             $btn.css(button_styles);
 
-            var updateButton = function(){
+            /* Style the input */
+            $input.css({ "padding-left": 28 });
 
+            /* the updateButton() function is called to change the button when
+               the lock status has been changed */
+            var updateButton = function(){
                 $this.attr("data-locked", settings["locked"])
                 if(settings['locked']) {
-                    $label.addClass("lf-locked");
+                    $container.addClass("lf-locked");
                     $btn.html(locked_btn_html);
 
                     $input.css("background-color", settings['lockedInputFillColor']);
                     $btn.css("background-color", settings['lockedButtonFillColor']);
                 } else {
-                    $label.removeClass("lf-locked");
+                    $container.removeClass("lf-locked");
                     $btn.html(unlocked_btn_html);
 
                     $input.css("background-color", settings['unlockedInputFillColor']);
                     $btn.css("background-color", settings['unlockedButtonFillColor']);
                 }
 
+                /* Call the user's callback function */
                 settings.onChange();
             };
 
+            /* Call updateButton() on each initialization */
             updateButton();
 
-            // Bind our geocoding operation to the input entry
+            /* List for button clicks to both lock and unlock the field */
             $btn.on("click", function (event) {
                 event.preventDefault();
                 if(!settings["unlockable"]) { return false; }
@@ -118,7 +132,8 @@
                 updateButton();
             });
 
-            $input.on("click", function (event) {
+            /* List for input clicks and focuses to only unlock the field */
+            $input.on("click focus", function (event) {
                 event.preventDefault();
                 if(settings['locked']) {
                     if(!settings["unlockable"]) { return false; }
@@ -127,6 +142,8 @@
                 }
             });
 
+            /* Store all of the settings to be retrieved the next
+               time lockableField() is applied */
             $this.data('_LockableFieldSettings', settings);
         });
     };
