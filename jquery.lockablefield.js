@@ -37,9 +37,7 @@
                 'locked': true,
                 'unlockable': true,
                 'icons': "emoji",
-                'unlockedButtonFillColor': "#D6E8F5",
                 'unlockedInputFillColor': "#D6E8F5",
-                'lockedButtonFillColor': "initial",
                 'lockedInputFillColor': "#FFFFFF",
                 'extraButtonStyles': {},
                 'onChange': function(){}
@@ -88,6 +86,9 @@
                     "padding-left": 5,
                     "padding-bottom": ($input.height())/2,
                     "left": 0,
+                    "user-select": "none",
+                    "-webkit-user-select": "none",
+                    "-moz-user-select": "none"
                 },
                 settings['extraButtonStyles']
             );
@@ -108,13 +109,11 @@
                     $btn.html(locked_btn_html);
 
                     $input.css("background-color", settings['lockedInputFillColor']);
-                    $btn.css("background-color", settings['lockedButtonFillColor']);
                 } else {
                     $container.removeClass("lf-locked");
                     $btn.html(unlocked_btn_html);
 
                     $input.css("background-color", settings['unlockedInputFillColor']);
-                    $btn.css("background-color", settings['unlockedButtonFillColor']);
                 }
 
                 /* Call the user's callback function */
